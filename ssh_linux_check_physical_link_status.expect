@@ -1,0 +1,40 @@
+#!/usr/bin/expect -f
+
+# By: TonyCasanova - 2016
+
+set Target_User "<InsertUserNameHere>"
+set Target_Host "<InsertTargetHostHere>"
+
+stty -echo
+
+send_user -- "Password for $Target_User@$Target_Host: "
+
+expect_user -re "(.*)\n"
+
+send_user "\n"
+
+stty echo
+
+set Target_Password $expect_out(1,string)
+
+spawn ssh $Target_User@$Target_Host
+
+expect "password:"
+
+send "$Target_Password\r"
+
+expect "$ "
+send "uname -a\r"
+expect "$ "
+send "date\r"
+expect "$ "
+
+send "for i in \$( ls /sys/class/net ); do echo -n \$i; ethtool \$i | grep Link\\ d; done\r"
+expect "$ "
+send "\r"
+expect "$ "
+
+send "for i in \$( ls /sys/class/net ); do echo -n \$i: ; cat /sys/class/net/\$i/carrier; done\r"
+expect "$ "
+
+send "exit\r"
